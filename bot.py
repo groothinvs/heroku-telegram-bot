@@ -1,20 +1,25 @@
-# -*- coding: utf-8 -*-
-import redis
-import os
-import telebot
-# import some_api_lib
-# import ...
+#!/usr/bin/env python3
+from telegram.ext import Updater, MessageHandler, Filters
+import logging
 
-# Example of your code beginning
-#           Config vars
-token = os.environ['TELEGRAM_TOKEN']
-some_api_token = os.environ['SOME_API_TOKEN']
-#             ...
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-# If you use redis, install this add-on https://elements.heroku.com/addons/heroku-redis
-r = redis.from_url(os.environ.get("REDIS_URL"))
+def welcome(bot: Bot, update: Update):
+    msg = update.effective_message
+    chat = update.effective_chat
+    usr = update.effective_user
 
-#       Your bot code below
-# bot = telebot.TeleBot(token)
-# some_api = some_api_lib.connect(some_api_token)
-#              ...
+    for u in msg.new_chat_members:
+        bot.sendMessage(chat.id, 'Welcome {} to {}! Please read the pinned message.'.format(u.mention_html(), chat.title), parse_mode='HTML')
+
+
+if __name__ == "__main__":
+    ud = Updater(token='546028656:AAGOJ93532CE_w_IM6jrdw2EurWqMOB7A58')
+    dp = ud.dispatcher
+
+    dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome))
+
+    ud.start_polling()
+    ud.idle()
